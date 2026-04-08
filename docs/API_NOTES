@@ -1,1 +1,5 @@
-
+# API使用メモ
+- **使用モデル**: gemini-2.0-flash
+- **エンドポイント**: v1beta/models/gemini-2.0-flash:generateContent
+- **公式ドキュメント**: https://ai.google.dev/gemini-api/docs/audio
+- **制限**: 短い音声（1分程度）での動作を確認済み。
