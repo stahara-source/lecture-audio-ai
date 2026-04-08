@@ -7,42 +7,76 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root { --primary-color: #4a90e2; --bg-color: #f8f9fa; --card-bg: #ffffff; --text-color: #333; --accent-color: #ff4757; }
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; display: flex; justify-content: center; }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 15px; display: flex; justify-content: center; }
         .container { width: 100%; max-width: 600px; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
         
-        /* 設定カード */
-        #settings-card { border: 2px solid var(--primary-color); background-color: #f0f7ff; }
-        .setup-notice { color: var(--accent-color); font-weight: bold; font-size: 0.9em; margin-bottom: 10px; }
-        
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], input[type="file"] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; margin-bottom: 15px; }
-        button { width: 100%; padding: 14px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        
-        .loading { display: none; text-align: center; margin: 20px 0; color: var(--primary-color); }
-        .result-area { display: none; }
-        
-        /* 結果カードと、テキストの折り返し設定 */
-        .result-card { position: relative; background: #fff; border-left: 6px solid var(--primary-color); padding: 20px; margin-top: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-        
-        /* 解析結果テキストが表示される部分のスタイル */
-        .result-card div[id$="-result"] {
-            line-height: 1.6;           /* 行間を広げて読みやすく */
-            font-size: 0.95rem;         /* 文字サイズをわずかに調整 */
-            
-            /* --- ここがスマホ改行修正のポイント --- */
-            white-space: pre-wrap;       /* Geminiからの改行を尊重しつつ、画面端で自動折り返し */
-            overflow-wrap: break-word;  /* 長い英単語やURLもはみ出させず折り返し */
-            word-wrap: break-word;      /* Compat */
+        /* --- 外部ブラウザ注意喚起のスタイル --- */
+        .browser-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            border: 1px solid #ffeeba;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            line-height: 1.4;
+        }
+
+        /* --- タイトル一列化の修正 --- */
+        header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+        }
+        header h1 { 
+            font-size: 1.5rem; 
+            margin: 0; 
+            white-space: nowrap; /* 絶対に改行させない */
         }
         
-        .copy-btn { position: absolute; top: 15px; right: 15px; background: #f0f0f0; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-        #settings-btn { background: none; color: #666; font-size: 24px; border: none; cursor: pointer; }
+        /* スマホ画面（幅480px以下）のときの微調整 */
+        @media (max-width: 480px) {
+            header h1 { 
+                font-size: 1.15rem; /* スマホでは確実に1行に収まるサイズに縮小 */
+            }
+            #settings-btn {
+                font-size: 20px; /* 歯車アイコンも少しだけ小さく */
+            }
+        }
+
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        #settings-card { border: 2px solid var(--primary-color); background-color: #f0f7ff; }
+        .setup-notice { color: var(--accent-color); font-weight: bold; font-size: 0.9em; margin-bottom: 10px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="file"] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; margin-bottom: 15px; font-size: 16px; }
+        button { width: 100%; padding: 14px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .loading { display: none; text-align: center; margin: 20px 0; color: var(--primary-color); }
+        .result-area { display: none; }
+        .result-card { position: relative; background: #fff; border-left: 6px solid var(--primary-color); padding: 20px; margin-top: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        
+        /* 解析結果のテキスト折り返し */
+        .result-card div[id$="-result"] {
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            word-break: break-all;
+        }
+        
+        .copy-btn { position: absolute; top: 15px; right: 15px; background: #f0f0f0; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        #settings-btn { background: none; color: #666; font-size: 24px; border: none; cursor: pointer; padding: 5px; }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="browser-warning" id="browser-warning">
+            <i class="fas fa-info-circle" style="margin-top: 3px;"></i>
+            <div>LINE等のアプリ内ブラウザでは設定が保存できない場合があります。右上のメニューから<strong>SafariやChromeなどのブラウザで開いて</strong>ご利用ください。</div>
+        </div>
+
         <header>
             <h1><i class="fas fa-file-audio"></i> 講義音声ノートAI</h1>
             <button id="settings-btn" onclick="toggleSettings()"><i class="fas fa-cog"></i></button>
@@ -80,18 +114,16 @@
             const card = document.getElementById('settings-card');
             card.style.display = card.style.display === 'none' ? 'block' : 'none';
         }
-
         function saveApiKey() {
             const key = document.getElementById('api-key').value;
             if(!key) return alert('キーを入力してください');
             localStorage.setItem('gemini_api_key', key);
-            alert('APIキーを保存しました。解析が可能です！');
+            alert('保存しました');
             document.getElementById('setup-msg').style.display = 'none';
             document.getElementById('settings-card').style.border = 'none';
             document.getElementById('settings-card').style.backgroundColor = '#ffffff';
             toggleSettings();
         }
-
         window.onload = () => {
             const savedKey = localStorage.getItem('gemini_api_key');
             document.getElementById('api-key').value = savedKey || '';
@@ -100,60 +132,42 @@
                 document.getElementById('setup-msg').style.display = 'block';
             }
         };
-
         function copyText(id) { navigator.clipboard.writeText(document.getElementById(id).innerText).then(() => alert('コピーしました！')); }
-
         async function processAudio() {
             const apiKey = localStorage.getItem('gemini_api_key');
             const fileInput = document.getElementById('audio-file');
-            
             if (!apiKey) {
-                alert('APIキーが設定されていません。上の設定画面から保存してください。');
+                alert('APIキーを設定してください');
                 document.getElementById('settings-card').style.display = 'block';
                 return;
             }
-            if (fileInput.files.length === 0) return alert('音声ファイルを選択してください');
-
+            if (fileInput.files.length === 0) return alert('ファイルを選択してください');
             const file = fileInput.files[0];
             const runBtn = document.getElementById('run-btn');
             const loading = document.getElementById('loading');
             const resultArea = document.getElementById('result-area');
-
             runBtn.disabled = true; loading.style.display = 'block'; resultArea.style.display = 'none';
-
             try {
                 const base64Data = await new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onload = () => resolve(reader.result.split(',')[1]);
                     reader.readAsDataURL(file);
                 });
-
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [
-                        { text: "音声を解析し、【要約】(3行程度)、【ポイント】(箇条書き)、【全文】のセクションに分けて日本語で出力してください。" },
+                        { text: "音声を解析し、【要約】(3行)、【ポイント】(箇条書き)、【全文】に分けて日本語で出力して。" },
                         { inline_data: { mime_type: file.type, data: base64Data } }
                     ]}]})
                 });
-
                 const data = await response.json();
-                if(data.error) throw new Error(data.error.message);
-                
                 const output = data.candidates[0].content.parts[0].text;
                 document.getElementById('display-title').innerText = document.getElementById('lecture-name').value || '解析結果';
-                
-                // .trim()を追加して余分な空白を除去
-                document.getElementById('summary-result').innerText = output.split('【要約】')[1]?.split('【ポイント】')[0]?.trim() || "抽出に失敗しました。";
-                document.getElementById('points-result').innerText = output.split('【ポイント】')[1]?.split('【全文】')[0]?.trim() || "抽出に失敗しました。";
+                document.getElementById('summary-result').innerText = output.split('【要約】')[1]?.split('【ポイント】')[0]?.trim() || "抽出失敗";
+                document.getElementById('points-result').innerText = output.split('【ポイント】')[1]?.split('【全文】')[0]?.trim() || "抽出失敗";
                 document.getElementById('transcription-result').innerText = output.split('【全文】')[1]?.trim() || output;
-                
                 resultArea.style.display = 'block';
-            } catch (e) { 
-                console.error(e);
-                alert('エラーが発生しました: ' + e.message); 
-            } finally { 
-                runBtn.disabled = false; loading.style.display = 'none'; 
-            }
+            } catch (e) { alert('エラーが発生しました'); } finally { runBtn.disabled = false; loading.style.display = 'none'; }
         }
     </script>
 </body>
