@@ -10,42 +10,16 @@
         body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 15px; display: flex; justify-content: center; }
         .container { width: 100%; max-width: 600px; }
         
-        /* --- 外部ブラウザ注意喚起のスタイル --- */
-        .browser-warning {
-            background-color: #fff3cd;
-            color: #856404;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            border: 1px solid #ffeeba;
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            line-height: 1.4;
-        }
+        /* 外部ブラウザ注意喚起 */
+        .browser-warning { background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; border: 1px solid #ffeeba; display: flex; align-items: flex-start; gap: 8px; line-height: 1.4; }
 
-        /* --- タイトル一列化の修正 --- */
-        header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 20px; 
-        }
-        header h1 { 
-            font-size: 1.5rem; 
-            margin: 0; 
-            white-space: nowrap; /* 絶対に改行させない */
-        }
+        /* タイトル一列化 */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        header h1 { font-size: 1.5rem; margin: 0; white-space: nowrap; }
         
-        /* スマホ画面（幅480px以下）のときの微調整 */
         @media (max-width: 480px) {
-            header h1 { 
-                font-size: 1.15rem; /* スマホでは確実に1行に収まるサイズに縮小 */
-            }
-            #settings-btn {
-                font-size: 20px; /* 歯車アイコンも少しだけ小さく */
-            }
+            header h1 { font-size: 1.15rem; }
+            #settings-btn { font-size: 20px; }
         }
 
         .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
@@ -53,20 +27,52 @@
         .setup-notice { color: var(--accent-color); font-weight: bold; font-size: 0.9em; margin-bottom: 10px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
         input[type="text"], input[type="file"] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; margin-bottom: 15px; font-size: 16px; }
-        button { width: 100%; padding: 14px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        
+        /* メインのボタン（青色・立体感） */
+        button { width: 100%; padding: 14px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s, transform 0.1s; }
+        button:hover { background-color: #357abd; }
+        button:active { transform: scale(0.98); } /* クリック時に少し沈む演出 */
+
         .loading { display: none; text-align: center; margin: 20px 0; color: var(--primary-color); }
         .result-area { display: none; }
-        .result-card { position: relative; background: #fff; border-left: 6px solid var(--primary-color); padding: 20px; margin-top: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
         
-        /* 解析結果のテキスト折り返し */
-        .result-card div[id$="-result"] {
-            line-height: 1.6;
-            white-space: pre-wrap;
-            overflow-wrap: break-word;
-            word-break: break-all;
+        /* 結果カード（相対配置をやめる） */
+        .result-card { background: #fff; border-left: 6px solid var(--primary-color); padding: 20px; margin-top: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); overflow: auto; }
+        
+        /* 解析結果のテキスト */
+        .result-card div[id$="-result"] { line-height: 1.6; white-space: pre-wrap; overflow-wrap: break-word; word-break: break-all; margin-bottom: 15px; /* ボタンとの間隔 */ }
+        
+        /* --- コピーボタン（青色・ボタンらしく修正） --- */
+        .copy-btn { 
+            /* 絶対配置をやめて、テキストの下に普通に配置 */
+            display: inline-block;
+            width: auto; /* パソコンでは文字幅に合わせる */
+            float: right; /* 右寄せ */
+            padding: 8px 16px; 
+            background-color: var(--primary-color); /* 青色 */
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            font-size: 14px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: background 0.3s, transform 0.1s;
+        }
+        .copy-btn:hover { background-color: #357abd; }
+        .copy-btn:active { transform: scale(0.96); }
+
+        /* スマホ画面のときのコピーボタンの調整 */
+        @media (max-width: 480px) {
+            .copy-btn {
+                width: 100%; /* スマホではメインボタンと同じ幅にする */
+                float: none; /* 右寄せを解除 */
+                padding: 12px; /* 押しやすく大きく */
+                box-sizing: border-box;
+                text-align: center;
+                margin-top: 10px;
+            }
         }
         
-        .copy-btn { position: absolute; top: 15px; right: 15px; background: #f0f0f0; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
         #settings-btn { background: none; color: #666; font-size: 24px; border: none; cursor: pointer; padding: 5px; }
     </style>
 </head>
@@ -103,9 +109,24 @@
 
         <div id="result-area" class="result-area">
             <h2 id="display-title" style="text-align: center;"></h2>
-            <div class="result-card"><h3>3行要約</h3><div id="summary-result"></div><button class="copy-btn" onclick="copyText('summary-result')">コピー</button></div>
-            <div class="result-card"><h3>重要ポイント</h3><div id="points-result"></div><button class="copy-btn" onclick="copyText('points-result')">コピー</button></div>
-            <div class="result-card"><h3>文字起こし全文</h3><div id="transcription-result"></div><button class="copy-btn" onclick="copyText('transcription-result')">コピー</button></div>
+            
+            <div class="result-card">
+                <h3><i class="fas fa-list-ul"></i> 3行要約</h3>
+                <div id="summary-result"></div>
+                <button class="copy-btn" onclick="copyText('summary-result')"><i class="fas fa-copy"></i> コピー</button>
+            </div>
+            
+            <div class="result-card">
+                <h3><i class="fas fa-check-square"></i> 重要ポイント</h3>
+                <div id="points-result"></div>
+                <button class="copy-btn" onclick="copyText('points-result')"><i class="fas fa-copy"></i> コピー</button>
+            </div>
+            
+            <div class="result-card">
+                <h3><i class="fas fa-align-left"></i> 文字起こし全文</h3>
+                <div id="transcription-result"></div>
+                <button class="copy-btn" onclick="copyText('transcription-result')"><i class="fas fa-copy"></i> コピー</button>
+            </div>
         </div>
     </div>
 
@@ -132,7 +153,14 @@
                 document.getElementById('setup-msg').style.display = 'block';
             }
         };
-        function copyText(id) { navigator.clipboard.writeText(document.getElementById(id).innerText).then(() => alert('コピーしました！')); }
+        // コピー時のメッセージを少し親切に
+        function copyText(id) { 
+            navigator.clipboard.writeText(document.getElementById(id).innerText).then(() => {
+                alert('クリップボードにコピーしました！');
+            }).catch(err => {
+                alert('コピーに失敗しました。外部ブラウザで利用してください。');
+            });
+        }
         async function processAudio() {
             const apiKey = localStorage.getItem('gemini_api_key');
             const fileInput = document.getElementById('audio-file');
