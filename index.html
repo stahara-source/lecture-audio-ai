@@ -5,9 +5,123 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>講義音声ノートAI</title>
-    <link rel="stylesheet" href="index.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
 
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            background: #fff;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover { background-color: #357abd; }
+        button:disabled { background-color: #ccc; }
+
+        .result-area { display: none; }
+
+        .result-card {
+            position: relative;
+            background: #fff;
+            border-left: 5px solid var(--primary-color);
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #eee;
+            border: none;
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 4px;
+            width: auto;
+            color: #333;
+        }
+
+        #settings-btn {
+            background: none;
+            color: #666;
+            width: auto;
+            font-size: 20px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+    </style>
 </head>
 
 <body>
@@ -36,7 +150,7 @@
         </div>
 
         <div id="loading" class="loading">
-            <i class="fas fa-spinner fa-spin"></i> Geminiが解析中...（数十秒かかる場合があります）
+            <i class="fas fa-spinner fa-spin"></i> Geminiが解析中...
         </div>
 
         <div id="result-area" class="result-area">
@@ -63,13 +177,11 @@
     </div>
 
     <script>
-        // 設定の開閉
         function toggleSettings() {
             const card = document.getElementById('settings-card');
             card.style.display = card.style.display === 'none' ? 'block' : 'none';
         }
 
-        // APIキーの保存
         function saveApiKey() {
             const key = document.getElementById('api-key').value;
             localStorage.setItem('gemini_api_key', key);
@@ -77,18 +189,15 @@
             toggleSettings();
         }
 
-        // ページ読み込み時にキーを表示
         window.onload = () => {
             document.getElementById('api-key').value = localStorage.getItem('gemini_api_key') || '';
         };
 
-        // クリップボードにコピー
         function copyText(id) {
             const text = document.getElementById(id).innerText;
             navigator.clipboard.writeText(text).then(() => alert('コピーしました！'));
         }
 
-        // 音声処理メイン
         async function processAudio() {
             const apiKey = localStorage.getItem('gemini_api_key');
             const fileInput = document.getElementById('audio-file');
@@ -114,7 +223,7 @@
                     body: JSON.stringify({
                         contents: [{
                             parts: [
-                                { text: "渡された音声を解析し、以下の3つのセクションに分けて日本語で出力してください。セクションの区切りには必ず以下の見出しを入れてください。\n\n【要約】\n(ここに3行程度の要約)\n\n【ポイント】\n(ここに箇条書きの要点)\n\n【全文】\n(ここに文字起こし全文)" },
+                                { text: "渡された音声を解析し、以下の3つのセクションに分けて日本語で出力してください。セクションの区切りには必ず以下の見出しを入れてください。\n\n【要約】\n(ここに3行程度の要約)\n\n【ポイント】\n(ここに箇記事の要点)\n\n【全文】\n(ここに文字起こし全文)" },
                                 { inline_data: { mime_type: file.type, data: base64Data } }
                             ]
                         }]
@@ -124,13 +233,11 @@
                 const data = await response.json();
                 const output = data.candidates[0].content.parts[0].text;
 
-                // --- ここでテキストを分割（パース）してそれぞれの箱に入れる ---
                 document.getElementById('display-title').innerText = lectureName;
 
-                // 【要約】、【ポイント】、【全文】という文字で分割する
                 const summaryPart = output.split('【要約】')[1]?.split('【ポイント】')[0] || "要約の抽出に失敗しました";
                 const pointsPart = output.split('【ポイント】')[1]?.split('【全文】')[0] || "ポイントの抽出に失敗しました";
-                const fullTextPart = output.split('【全文】')[1] || output; // 分割失敗時は全体を表示
+                const fullTextPart = output.split('【全文】')[1] || output;
 
                 document.getElementById('summary-result').innerText = summaryPart.trim();
                 document.getElementById('points-result').innerText = pointsPart.trim();
